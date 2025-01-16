@@ -25,29 +25,33 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 let emailService;
 
 if (isDevelopment) {
-    // Configure Nodemailer with Ethereal for development
+    // Configure Nodemailer with Mailpit for development
+    const mailpitTransport = nodemailer.createTransport({
+        host: "127.0.0.1",
+        port: 1025,  // Mailpit SMTP port
+        secure: false,
+        ignoreTLS: true // Mailpit doesn't support TLS
+    });
+
     emailService = {
         async sendEmail({ to, from, subject, html }) {
             try {
-                const testAccount = await nodemailer.createTestAccount();
-                const transporter = nodemailer.createTransport({
-                    host: 'smtp.ethereal.email',
-                    port: 587,
-                    secure: false,
-                    auth: {
-                        user: testAccount.user,
-                        pass: testAccount.pass,
-                    },
+                const info = await mailpitTransport.sendMail({
+                    to,
+                    from: from || 'test@example.com',
+                    subject,
+                    html
                 });
-
-                const info = await transporter.sendMail({ to, from, subject, html });
-                console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                
+                console.log('Email sent to Mailpit');
+                console.log('Preview URL: http://localhost:8025');  // Mailpit web interface
+                
                 return info;
             } catch (error) {
-                console.error('Error sending email:', error);
+                console.error('Error sending email to Mailpit:', error);
                 throw error;
             }
-        },
+        }
     };
 } else {
     emailService = new Resend(process.env.RESEND_API_KEY);
@@ -125,7 +129,11 @@ const validateFormLink = [
 
 // Serve the HTML template
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/templates/index.html");
+    res.sendFile(__dirname + "/templates/index.html");  // marketing page
+});
+
+app.get("/form", (req, res) => {
+    res.sendFile(__dirname + "/templates/form.html");  // feedback form
 });
 
 // API: Submit Feedback
@@ -207,7 +215,7 @@ app.post("/api/generate-form-link", strictLimiter, validateFormLink, validateApi
             { expiresIn: '24h' }
         );
         
-        const formUrl = `${req.protocol}://${req.get('host')}/?token=${token}`;
+        const formUrl = `${req.protocol}://${req.get('host')}/form?token=${token}`;
         
         await emailService.sendEmail({
             to: email,
