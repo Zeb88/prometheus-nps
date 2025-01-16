@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prometheus NPS - Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#D55672',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <!-- Logo Section -->
+                    <div class="flex items-center">
+                        <a href="/" class="text-xl font-bold text-primary">Prometheus NPS</a>
+                    </div>
+        
+                    <!-- Navigation Links -->
+                    <div class="hidden sm:flex sm:items-center sm:space-x-8">
+                        <a href="/" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+                            Form
+                        </a>
+                        <a href="/docs" class="text-gray-900 border-b-2 border-primary px-3 py-2 text-sm font-medium">
+                            Documentation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+
+        <!-- Content -->
+        <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="prose prose-lg max-w-none">
+                <h1 class="text-4xl font-bold text-gray-900 mb-8">API Documentation</h1>
+
+                <!-- Introduction -->
+                <div class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
+                    <p class="text-gray-600 mb-4">
+                        The Prometheus NPS API allows you to collect and analyze Net Promoter Score (NPS) feedback from your users.
+                        This documentation covers all available endpoints and their usage.
+                    </p>
+                </div>
+
+                <!-- Authentication -->
+                <div class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Authentication</h2>
+                    <p class="text-gray-600 mb-4">
+                        Admin endpoints require an API key to be included in the request headers:
+                    </p>
+                    <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+                        <code>X-API-Key: your-api-key</code>
+                    </div>
+                </div>
+
+                <!-- Endpoints -->
+                <div class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Endpoints</h2>
+
+                    <!-- Generate Form Link -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Generate Form Link</h3>
+                        <p class="text-gray-600 mb-4">Generate a pre-populated feedback form link for a specific user.</p>
+                        
+                        <div class="bg-gray-100 rounded-md p-4 mb-4">
+                            <p class="font-semibold">POST /api/generate-form-link</p>
+                            <p class="text-sm text-gray-500">Requires API Key</p>
+                        </div>
+
+                        <h4 class="font-semibold mb-2">Request Body</h4>
+                        <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+<pre>{
+  "name": "John Doe",
+  "email": "john@example.com"
+}</pre>
+                        </div>
+
+                        <h4 class="font-semibold mb-2">Response</h4>
+                        <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+<pre>{
+  "message": "Form link generated and sent to email",
+  "url": "https://your-domain.com/?token=..."
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Submit Feedback -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Submit Feedback</h3>
+                        <p class="text-gray-600 mb-4">Submit NPS feedback for a user.</p>
+                        
+                        <div class="bg-gray-100 rounded-md p-4 mb-4">
+                            <p class="font-semibold">POST /api/feedback</p>
+                        </div>
+
+                        <h4 class="font-semibold mb-2">Request Body</h4>
+                        <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+<pre>{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "npsScore": 9,
+  "feedback": "Great service! Would definitely recommend."
+}</pre>
+                        </div>
+
+                        <h4 class="font-semibold mb-2">Response</h4>
+                        <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+<pre>{
+  "message": "Feedback submitted successfully."
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Get Feedback Summary -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Get Feedback Summary</h3>
+                        <p class="text-gray-600 mb-4">Get an AI-generated summary of all feedback.</p>
+                        
+                        <div class="bg-gray-100 rounded-md p-4 mb-4">
+                            <p class="font-semibold">GET /api/summary</p>
+                            <p class="text-sm text-gray-500">Requires API Key</p>
+                        </div>
+
+                        <h4 class="font-semibold mb-2">Response</h4>
+                        <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+<pre>{
+  "summary": "Overall positive feedback with an average NPS score of 8.5..."
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rate Limits -->
+                <div class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Rate Limits</h2>
+                    <ul class="list-disc pl-6 text-gray-600">
+                        <li class="mb-2">General endpoints: 100 requests per 15 minutes per IP</li>
+                        <li class="mb-2">Form generation: 5 requests per 15 minutes per IP</li>
+                    </ul>
+                </div>
+
+                <!-- Error Handling -->
+                <div class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Error Handling</h2>
+                    <p class="text-gray-600 mb-4">
+                        All errors follow this format:
+                    </p>
+                    <div class="bg-gray-800 text-gray-200 rounded-md p-4 mb-4">
+<pre>{
+  "error": "Error message description"
+}</pre>
+                    </div>
+                    <p class="text-gray-600">Common HTTP status codes:</p>
+                    <ul class="list-disc pl-6 text-gray-600">
+                        <li>400: Bad Request - Invalid input</li>
+                        <li>401: Unauthorized - Missing or invalid API key</li>
+                        <li>429: Too Many Requests - Rate limit exceeded</li>
+                        <li>500: Internal Server Error - Server-side error</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-12">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-gray-500 text-sm">
+                    &copy; 2024 Prometheus NPS. All rights reserved.
+                </p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html> 
