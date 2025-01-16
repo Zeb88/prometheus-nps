@@ -180,9 +180,25 @@ app.get("/api/summary", validateApiKey, async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("feedback")
-            .select("feedback");
+            .select("nps_score, feedback"); // Select both nps_score and feedback fields
 
         if (error) throw error;
+
+        const totalResponses = data.length;
+
+        if (totalResponses === 0) {
+            return res.status(200).json({ nps: 0, message: "No feedback available." });
+        }
+
+        const promoters = data.filter(entry => entry.nps_score >= 9).length;
+        const detractors = data.filter(entry => entry.nps_score <= 6).length;
+
+        // Calculate percentages
+        const promotersPercentage = (promoters / totalResponses) * 100;
+        const detractorsPercentage = (detractors / totalResponses) * 100;
+
+        // Calculate NPS
+        const nps = promotersPercentage - detractorsPercentage;
 
         const feedbackTexts = data.map(entry => entry.feedback).join("\n");
 
@@ -192,12 +208,16 @@ app.get("/api/summary", validateApiKey, async (req, res) => {
             max_tokens: 150,
         });
 
-        res.status(200).json({ summary: completion.choices[0].text.trim() });
+        res.status(200).json({ 
+            summary: completion.choices[0].text.trim(),
+            nps: nps.toFixed(2) // Return NPS rounded to two decimal places
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Failed to summarize feedback." });
     }
 });
+
 
 // Add this new endpoint
 app.post("/api/generate-form-link", strictLimiter, validateFormLink, validateApiKey, async (req, res) => {
@@ -275,6 +295,10 @@ app.post("/api/verify-token", async (req, res) => {
 // Add this new route after your existing routes
 app.get("/docs", (req, res) => {
     res.sendFile(__dirname + "/templates/docs.html");
+});
+
+app.get("/summary", (req, res) => {
+    res.sendFile(__dirname + "/templates/summary.html");
 });
 
 // Start the Server
