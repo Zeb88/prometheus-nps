@@ -10,6 +10,7 @@ require("dotenv").config();
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const helmet = require('helmet');
+const { Parser } = require('json2csv');
 
 const app = express();
 const port = 3002;
@@ -299,6 +300,37 @@ app.get("/docs", (req, res) => {
 
 app.get("/summary", (req, res) => {
     res.sendFile(__dirname + "/templates/summary.html");
+});
+
+// Add this new endpoint after your existing routes
+app.get("/api/download-csv", validateApiKey, async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from("feedback")
+            .select("inserted_at, name, email, nps_score, feedback")
+            .order('inserted_at', { ascending: false });
+
+        if (error) throw error;
+
+        const fields = [
+            { label: 'Date', value: 'inserted_at' },
+            { label: 'Name', value: 'name' },
+            { label: 'Email', value: 'email' },
+            { label: 'NPS Score', value: 'nps_score' },
+            { label: 'Feedback', value: 'feedback' }
+        ];
+        
+        const opts = { fields };
+        const parser = new Parser(opts);
+        const csv = parser.parse(data);
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=feedback-responses.csv');
+        res.status(200).send(csv);
+    } catch (error) {
+        console.error('Error generating CSV:', error);
+        res.status(500).json({ error: "Failed to generate CSV file" });
+    }
 });
 
 // Start the Server
