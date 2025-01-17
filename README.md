@@ -152,3 +152,14 @@ MIT License - see LICENSE file for details
 3. Commit your changes
 4. Push to the branch
 5. Create a new Pull Request
+
+### API Documentation
+
+The API documentation is available through Swagger UI at `/api-docs`. This interactive documentation includes:
+
+- Detailed endpoint descriptions
+- Request/response schemas
+- Authentication requirements
+- Try-it-out functionality
+
+Access the documentation at `http://localhost:3002/api-docs` when running locally.

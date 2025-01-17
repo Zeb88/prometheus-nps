@@ -11,6 +11,8 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const helmet = require('helmet');
 const { Parser } = require('json2csv');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 const port = 3002;
@@ -332,6 +334,216 @@ app.get("/api/download-csv", validateApiKey, async (req, res) => {
         res.status(500).json({ error: "Failed to generate CSV file" });
     }
 });
+
+// Swagger configuration
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Prometheus NPS API',
+            version: '1.0.0',
+            description: 'API documentation for Prometheus NPS feedback system',
+        },
+        servers: [
+            {
+                url: process.env.NODE_ENV === 'production' 
+                    ? 'https://your-production-url.com' 
+                    : `http://localhost:${port}`,
+                description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
+            },
+        ],
+        components: {
+            securitySchemes: {
+                ApiKeyAuth: {
+                    type: 'apiKey',
+                    in: 'header',
+                    name: 'X-API-Key',
+                    description: 'Admin API key for protected endpoints'
+                },
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                    description: 'JWT token for form access'
+                }
+            }
+        }
+    },
+    apis: ['./server.js'], // Path to the API docs
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Add Swagger documentation for each endpoint
+/**
+ * @swagger
+ * /api/feedback:
+ *   post:
+ *     summary: Submit NPS feedback
+ *     tags: [Feedback]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - npsScore
+ *               - feedback
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Customer name
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Customer email
+ *               npsScore:
+ *                 type: integer
+ *                 minimum: 0
+ *                 maximum: 10
+ *                 description: NPS score (0-10)
+ *               feedback:
+ *                 type: string
+ *                 description: Customer feedback text
+ *     responses:
+ *       200:
+ *         description: Feedback submitted successfully
+ *       400:
+ *         description: Invalid input data
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/summary:
+ *   get:
+ *     summary: Get NPS summary and AI analysis
+ *     tags: [Analysis]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Summary data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 nps:
+ *                   type: string
+ *                   description: Current NPS score
+ *                 summary:
+ *                   type: string
+ *                   description: AI-generated feedback summary
+ *       401:
+ *         description: Unauthorized - Invalid API key
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/generate-form-link:
+ *   post:
+ *     summary: Generate personalized feedback form link
+ *     tags: [Form Management]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Customer name
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Customer email
+ *     responses:
+ *       200:
+ *         description: Form link generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 url:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - Invalid API key
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/verify-token:
+ *   post:
+ *     summary: Verify form access token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: JWT token to verify
+ *     responses:
+ *       200:
+ *         description: Token verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *       401:
+ *         description: Invalid or expired token
+ */
+
+/**
+ * @swagger
+ * /api/download-csv:
+ *   get:
+ *     summary: Download feedback data as CSV
+ *     tags: [Data Export]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: CSV file download
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       401:
+ *         description: Unauthorized - Invalid API key
+ *       500:
+ *         description: Server error
+ */
 
 // Start the Server
 app.listen(port, () => {
