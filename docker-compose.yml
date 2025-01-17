@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+    depends_on:
+      - mailpit
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
+    volumes:
+      - mailpit_data:/data
+
+volumes:
+  mailpit_data: 

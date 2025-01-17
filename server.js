@@ -30,10 +30,10 @@ let emailService;
 if (isDevelopment) {
     // Configure Nodemailer with Mailpit for development
     const mailpitTransport = nodemailer.createTransport({
-        host: "127.0.0.1",
-        port: 1025,  // Mailpit SMTP port
+        host: process.env.MAILPIT_HOST || "mailpit",  // Use service name from docker-compose
+        port: 1025,
         secure: false,
-        ignoreTLS: true // Mailpit doesn't support TLS
+        ignoreTLS: true
     });
 
     emailService = {

@@ -163,3 +163,56 @@ The API documentation is available through Swagger UI at `/api-docs`. This inter
 - Try-it-out functionality
 
 Access the documentation at `http://localhost:3002/api-docs` when running locally.
+
+## Docker Setup
+
+You can run the application using Docker and Docker Compose:
+
+1. **Build and start the containers**
+   ```bash
+   docker compose up --build
+   ```
+
+2. **Access the services**
+   - Application: `http://localhost:3002`
+   - Mailpit UI: `http://localhost:8025`
+
+3. **Stop the containers**
+   ```bash
+   docker compose down
+   ```
+
+### Development with Docker
+
+- The application code is mounted as a volume, so changes will trigger automatic reload
+- Emails sent by the application can be viewed in Mailpit UI
+- Node modules are stored in a named volume for better performance
+
+### Production Deployment with Docker
+
+1. Create a production Docker Compose file:
+   ```bash
+   cp docker-compose.yml docker-compose.prod.yml
+   ```
+
+2. Modify the production configuration:
+   ```yaml
+   # docker-compose.prod.yml
+   version: '3.8'
+   
+   services:
+     app:
+       build: .
+       ports:
+         - "3002:3002"
+       environment:
+         - NODE_ENV=production
+         - PORT=3002
+         # Add your production environment variables
+       command: ["npm", "start"]
+   ```
+
+3. Deploy using production configuration:
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d
+   ```
