@@ -31,6 +31,7 @@
         "json2csv": "^6.0.0-alpha.2",
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "^6.9.16",
+        "nunjucks": "^3.2.4",
         "openai": "^4.0.0",
         "resend": "^4.1.1",
         "swagger-jsdoc": "^6.2.8",

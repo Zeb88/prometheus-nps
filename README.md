@@ -216,3 +216,51 @@ You can run the application using Docker and Docker Compose:
    ```bash
    docker compose -f docker-compose.prod.yml up -d
    ```
+
+## Project Structure
+
+```
+prometheus-nps/
+├── public/
+│   └── app.js
+├── templates/
+│   ├── layouts/
+│   │   └── base.html
+│   ├── partials/
+│   │   ├── nav.html
+│   │   └── footer.html
+│   ├── index.html
+│   ├── form.html
+│   ├── summary.html
+│   └── docs.html
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── LICENSE
+├── package.json
+├── README.md
+└── server.js
+```
+
+### Directory Overview
+
+- `public/`: Static assets and client-side JavaScript
+  - `app.js`: Main client-side application logic
+
+- `templates/`: HTML templates and components
+  - `layouts/`: Base template layouts
+    - `base.html`: Main layout template with common structure
+  - `partials/`: Reusable template components
+    - `nav.html`: Navigation bar component
+    - `footer.html`: Footer component
+  - `index.html`: Marketing/landing page
+  - `form.html`: NPS feedback form
+  - `summary.html`: Feedback analysis dashboard
+  - `docs.html`: API documentation page
+
+- `server.js`: Main application server
+- `docker-compose.yml`: Docker Compose configuration
+- `Dockerfile`: Docker container configuration
+- `.env.example`: Example environment variables

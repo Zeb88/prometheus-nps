@@ -13,6 +13,7 @@ const helmet = require('helmet');
 const { Parser } = require('json2csv');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const nunjucks = require('nunjucks');
 
 const app = express();
 const port = 3002;
@@ -130,13 +131,24 @@ const validateFormLink = [
     body('email').isEmail().normalizeEmail()
 ];
 
+// Configure nunjucks after your other middleware
+nunjucks.configure('templates', {
+    autoescape: true,
+    express: app,
+    watch: isDevelopment
+});
+
 // Serve the HTML template
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/templates/index.html");  // marketing page
+    res.render('index.html', {
+        title: 'Home'
+    });
 });
 
 app.get("/form", (req, res) => {
-    res.sendFile(__dirname + "/templates/form.html");  // feedback form
+    res.render('form.html', {
+        title: 'Feedback Form'
+    });
 });
 
 // API: Submit Feedback
@@ -297,11 +309,15 @@ app.post("/api/verify-token", async (req, res) => {
 
 // Add this new route after your existing routes
 app.get("/docs", (req, res) => {
-    res.sendFile(__dirname + "/templates/docs.html");
+    res.render('docs.html', {
+        title: 'Documentation'
+    });
 });
 
 app.get("/summary", (req, res) => {
-    res.sendFile(__dirname + "/templates/summary.html");
+    res.render('summary.html', {
+        title: 'Summary'
+    });
 });
 
 // Add this new endpoint after your existing routes

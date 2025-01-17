@@ -1,195 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prometheus NPS - Summary</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#D55672',
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="text-xl font-bold text-primary">Prometheus NPS</a>
-                </div>
-                <div class="hidden sm:flex sm:items-center sm:space-x-8">
-                    <a href="/form" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">Form</a>
-                    <a href="/docs" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">Documentation</a>
-                    <a href="/summary" class="text-gray-900 border-b-2 border-primary px-3 py-2 text-sm font-medium">Summary</a>
-                </div>
+{% extends "layouts/base.html" %}
+
+{% block head %}
+<script>
+    // Any additional head content specific to summary page
+</script>
+{% endblock %}
+
+{% block content %}
+<div x-data="summaryData()" x-init="fetchSummary()" class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">NPS Summary</h1>
+            <p class="text-xl text-gray-600">Real-time feedback analysis and insights</p>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex justify-center items-center py-12">
+            <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error" class="text-center py-12">
+            <div class="bg-red-50 text-red-700 p-4 rounded-md inline-block">
+                <p x-text="error"></p>
             </div>
         </div>
-    </nav>
 
-    <div x-data="summaryData()" x-init="fetchSummary()" class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-            <!-- Header -->
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4">NPS Summary</h1>
-                <p class="text-xl text-gray-600">Real-time feedback analysis and insights</p>
-            </div>
-
-            <!-- Loading State -->
-            <div x-show="loading" class="flex justify-center items-center py-12">
-                <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            </div>
-
-            <!-- Error State -->
-            <div x-show="error" class="text-center py-12">
-                <div class="bg-red-50 text-red-700 p-4 rounded-md inline-block">
-                    <p x-text="error"></p>
+        <!-- Content -->
+        <div x-show="!loading && !error" class="space-y-8">
+            <!-- NPS Score Card -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">Net Promoter Score</h2>
+                <div class="flex items-center justify-center">
+                    <div class="text-6xl font-bold" :class="{
+                        'text-red-600': nps < 0,
+                        'text-yellow-600': nps >= 0 && nps < 50,
+                        'text-green-600': nps >= 50
+                    }" x-text="nps"></div>
+                </div>
+                <div class="mt-4 text-center text-gray-600">
+                    <template x-if="nps >= 50">
+                        <span>Excellent! Your customers are very satisfied.</span>
+                    </template>
+                    <template x-if="nps >= 0 && nps < 50">
+                        <span>Good, but there's room for improvement.</span>
+                    </template>
+                    <template x-if="nps < 0">
+                        <span>Action needed to improve customer satisfaction.</span>
+                    </template>
                 </div>
             </div>
 
-            <!-- Content -->
-            <div x-show="!loading && !error" class="space-y-8">
-                <!-- NPS Score Card -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Net Promoter Score</h2>
-                    <div class="flex items-center justify-center">
-                        <div class="text-6xl font-bold" :class="{
-                            'text-red-600': nps < 0,
-                            'text-yellow-600': nps >= 0 && nps < 50,
-                            'text-green-600': nps >= 50
-                        }" x-text="nps"></div>
-                    </div>
-                    <div class="mt-4 text-center text-gray-600">
-                        <template x-if="nps >= 50">
-                            <span>Excellent! Your customers are very satisfied.</span>
-                        </template>
-                        <template x-if="nps >= 0 && nps < 50">
-                            <span>Good, but there's room for improvement.</span>
-                        </template>
-                        <template x-if="nps < 0">
-                            <span>Action needed to improve customer satisfaction.</span>
-                        </template>
-                    </div>
-                </div>
+            <!-- Feedback Summary Card -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">AI-Generated Summary</h2>
+                <p class="text-gray-600" x-text="summary"></p>
+            </div>
 
-                <!-- Feedback Summary Card -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">AI-Generated Summary</h2>
-                    <p class="text-gray-600" x-text="summary"></p>
-                </div>
-
-                <!-- Refresh Button -->
-                <div class="text-center">
-                    <button 
-                        @click="fetchSummary()"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary mr-4"
-                    >
-                        Refresh Data
-                    </button>
-                    <button 
-                        @click="downloadCSV()"
-                        class="inline-flex items-center px-4 py-2 border border-primary text-sm font-medium rounded-md text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                    >
-                        Download CSV
-                    </button>
-                </div>
+            <!-- Refresh Button -->
+            <div class="text-center">
+                <button 
+                    @click="fetchSummary()"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary mr-4"
+                >
+                    Refresh Data
+                </button>
+                <button 
+                    @click="downloadCSV()"
+                    class="inline-flex items-center px-4 py-2 border border-primary text-sm font-medium rounded-md text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                >
+                    Download CSV
+                </button>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-12">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-gray-500 text-sm">
-                &copy; 2024 Prometheus NPS. All rights reserved.
-            </p>
-        </div>
-    </footer>
-</body>
+{% block scripts %}
 <script>
-function summaryData() {
-    return {
-        loading: true,
-        error: null,
-        nps: 0,
-        summary: '',
-        async fetchSummary() {
-            this.loading = true;
-            this.error = null;
-            try {
-                const response = await fetch('/api/summary', {
-                    headers: {
-                        'X-API-Key': localStorage.getItem('adminApiKey') || ''
-                    }
-                });
-                
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        const apiKey = prompt('Please enter your admin API key:');
-                        if (apiKey) {
-                            localStorage.setItem('adminApiKey', apiKey);
-                            // Retry the fetch with the new API key
-                            return this.fetchSummary();
+    function summaryData() {
+        return {
+            loading: true,
+            error: null,
+            nps: 0,
+            summary: '',
+            async fetchSummary() {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const response = await fetch('/api/summary', {
+                        headers: {
+                            'X-API-Key': localStorage.getItem('adminApiKey') || ''
                         }
-                    }
-                    throw new Error('Failed to fetch summary data');
-                }
-
-                const data = await response.json();
-                this.nps = parseFloat(data.nps);
-                this.summary = data.summary;
-            } catch (err) {
-                this.error = err.message;
-            } finally {
-                this.loading = false;
-            }
-        },
-        async downloadCSV() {
-            try {
-                const response = await fetch('/api/download-csv', {
-                    headers: {
-                        'X-API-Key': localStorage.getItem('adminApiKey') || ''
-                    }
-                });
-                
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        const apiKey = prompt('Please enter your admin API key:');
-                        if (apiKey) {
-                            localStorage.setItem('adminApiKey', apiKey);
-                            // Retry the download with the new API key
-                            return this.downloadCSV();
+                    });
+                    
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            const apiKey = prompt('Please enter your admin API key:');
+                            if (apiKey) {
+                                localStorage.setItem('adminApiKey', apiKey);
+                                // Retry the fetch with the new API key
+                                return this.fetchSummary();
+                            }
                         }
+                        throw new Error('Failed to fetch summary data');
                     }
-                    throw new Error('Failed to download CSV');
-                }
 
-                // Create a blob from the response
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'feedback-responses.csv';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            } catch (err) {
-                this.error = err.message;
+                    const data = await response.json();
+                    this.nps = parseFloat(data.nps);
+                    this.summary = data.summary;
+                } catch (err) {
+                    this.error = err.message;
+                } finally {
+                    this.loading = false;
+                }
+            },
+            async downloadCSV() {
+                try {
+                    const response = await fetch('/api/download-csv', {
+                        headers: {
+                            'X-API-Key': localStorage.getItem('adminApiKey') || ''
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            const apiKey = prompt('Please enter your admin API key:');
+                            if (apiKey) {
+                                localStorage.setItem('adminApiKey', apiKey);
+                                // Retry the download with the new API key
+                                return this.downloadCSV();
+                            }
+                        }
+                        throw new Error('Failed to download CSV');
+                    }
+
+                    // Create a blob from the response
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'feedback-responses.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } catch (err) {
+                    this.error = err.message;
+                }
             }
         }
     }
-}
 </script>
-</html> 
+{% endblock %} 
