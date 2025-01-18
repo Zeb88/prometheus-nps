@@ -142,6 +142,38 @@ For production deployment:
 3. Set secure JWT and Admin API keys
 4. Run `npm start`
 
+### Deploying to Vercel
+
+You can deploy this application to Vercel with just a few clicks:
+
+1. **Fork and Clone**
+   - Fork this repository
+   - Clone your forked repository locally
+
+2. **Configure Environment Variables**
+   In your Vercel project settings, add the following environment variables:
+   ```
+   NODE_ENV=production
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   OPENAI_API_KEY=your_openai_api_key
+   RESEND_API_KEY=your_resend_api_key
+   JWT_SECRET=your_jwt_secret
+   ADMIN_API_KEY=your_admin_api_key
+   ```
+
+3. **Deploy**
+   - Push your changes to GitHub
+   - Import your repository in Vercel
+   - Vercel will automatically detect the configuration and deploy your application
+
+4. **Verify Deployment**
+   - Check the deployment logs
+   - Test the application endpoints
+   - Verify email functionality with Resend
+
+The application includes a `vercel.json` configuration file that handles routing and build settings automatically.
+
 ## License
 
 MIT License - see LICENSE file for details
