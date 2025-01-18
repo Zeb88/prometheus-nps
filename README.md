@@ -60,10 +60,11 @@ A modern Net Promoter Score (NPS) feedback system with email integration, vector
 4. **Database Setup**
    Run the following SQL in your Supabase database:
    ```sql
-   -- Enable the moddatetime extension
+   -- Enable required extensions
    CREATE EXTENSION IF NOT EXISTS moddatetime SCHEMA extensions;
+   CREATE EXTENSION IF NOT EXISTS vector SCHEMA extensions;
 
-   -- Create the feedback table with timestamp management
+   -- Create the feedback table with timestamp management and vector support
    CREATE TABLE feedback (
      id uuid default uuid_generate_v4() primary key,
      inserted_at timestamptz DEFAULT timezone('utc'::text, now()) NOT NULL,
