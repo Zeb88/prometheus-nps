@@ -112,8 +112,8 @@ A modern Net Promoter Score (NPS) feedback system with email integration, vector
 ### API Endpoints
 
 - `POST /api/feedback` - Submit feedback
-- `GET /api/summary` - Get NPS summary and AI analysis
-- `POST /api/generate-form-link` - Generate personalized form link
+- `GET /api/summary` - Get NPS score and AI analysis
+- `POST /api/generate-send-form-link` - Generate and send personalized form link
 - `POST /api/verify-token` - Verify form access token
 - `GET /api/download-csv` - Download feedback data as CSV
 

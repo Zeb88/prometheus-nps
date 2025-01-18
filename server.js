@@ -14,6 +14,8 @@ const { Parser } = require('json2csv');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const nunjucks = require('nunjucks');
+const fs = require('fs').promises;
+const path = require('path');
 
 const app = express();
 const port = 3002;
@@ -176,11 +178,16 @@ app.post("/api/feedback", validateFeedback, async (req, res) => {
 
         if (error) throw error;
 
+        // Load and process email template
+        const templatePath = path.join(__dirname, 'templates', 'emails', 'thank-you.html');
+        const template = await fs.readFile(templatePath, 'utf8');
+        const emailContent = template.replace('{{name}}', name);
+
         await emailService.sendEmail({
             to: email,
             from: isDevelopment ? "test@example.com" : "no-reply@yourdomain.com",
             subject: "Thank you for your feedback!",
-            html: `<p>Hi ${name},</p><p>Thank you for sharing your feedback!</p>`,
+            html: emailContent,
         });
 
         res.status(200).json({ message: "Feedback submitted successfully." });
@@ -235,7 +242,7 @@ app.get("/api/summary", validateApiKey, async (req, res) => {
 
 
 // Add this new endpoint
-app.post("/api/generate-form-link", strictLimiter, validateFormLink, validateApiKey, async (req, res) => {
+app.post("/api/generate-send-form-link", strictLimiter, validateFormLink, validateApiKey, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -252,30 +259,18 @@ app.post("/api/generate-form-link", strictLimiter, validateFormLink, validateApi
         
         const formUrl = `${req.protocol}://${req.get('host')}/form?token=${token}`;
         
+        // Load and process email template
+        const templatePath = path.join(__dirname, 'templates', 'emails', 'feedback-form-link.html');
+        const template = await fs.readFile(templatePath, 'utf8');
+        const emailContent = template
+            .replace('{{name}}', name)
+            .replace(/{{formUrl}}/g, formUrl);
+
         await emailService.sendEmail({
             to: email,
             from: isDevelopment ? "test@example.com" : "no-reply@yourdomain.com",
             subject: "Your Feedback Form Link",
-            html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2>Hello ${name},</h2>
-                    <p>We value your feedback! Please click the link below to share your thoughts with us:</p>
-                    <p style="margin: 20px 0;">
-                        <a href="${formUrl}" 
-                           style="background-color: #D55672; 
-                                  color: white; 
-                                  padding: 12px 24px; 
-                                  text-decoration: none; 
-                                  border-radius: 6px; 
-                                  display: inline-block;">
-                            Share Your Feedback
-                        </a>
-                    </p>
-                    <p style="color: #666; font-size: 14px;">This link will expire in 24 hours.</p>
-                    <p style="color: #666; font-size: 14px;">If the button doesn't work, you can copy and paste this URL into your browser:</p>
-                    <p style="color: #666; font-size: 14px; word-break: break-all;">${formUrl}</p>
-                </div>
-            `
+            html: emailContent,
         });
         
         res.json({ 
@@ -464,9 +459,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /**
  * @swagger
- * /api/generate-form-link:
+ * /api/generate-send-form-link:
  *   post:
- *     summary: Generate personalized feedback form link
+ *     summary: Generate and send personalized feedback form link via email
  *     tags: [Form Management]
  *     security:
  *       - ApiKeyAuth: []
@@ -489,7 +484,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *                 description: Customer email
  *     responses:
  *       200:
- *         description: Form link generated successfully
+ *         description: Form link generated and sent successfully
  *         content:
  *           application/json:
  *             schema:
